@@ -1,15 +1,24 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+
+// Ensure uploads directory exists
+const uploadsDir = 'uploads';
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 // Configure storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    // FIX: Remove trailing slash for consistency
+    cb(null, 'uploads');
   },
   filename: (req, file, cb) => {
-    // Create unique filename
+    // FIX: Create cleaner filename without fieldname prefix
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    const cleanOriginalName = file.originalname.replace(/\s+/g, '-'); // Replace spaces with dashes
+    cb(null, uniqueSuffix + '-' + cleanOriginalName);
   }
 });
 
