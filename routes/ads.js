@@ -54,7 +54,8 @@ router.post('/', upload.single('image'), async (req, res) => {
       title: title.trim(),
       description: description?.trim(),
       category,
-      imagePath: req.file.path,
+      // FIX: Store only filename, not full path
+      imagePath: req.file.filename,
       originalFileName: req.file.originalname,
       mimeType: req.file.mimetype,
       fileSize: req.file.size
@@ -104,7 +105,8 @@ router.post('/bulk', upload.array('images', 10), async (req, res) => {
         title: (titleArray[i] || `Ad ${i + 1}`).trim(),
         description: (descriptionArray[i] || '').trim(),
         category,
-        imagePath: file.path,
+        // FIX: Store only filename, not full path
+        imagePath: file.filename,
         originalFileName: file.originalname,
         mimeType: file.mimetype,
         fileSize: file.size
@@ -179,9 +181,10 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Ad not found' });
     }
     
-    // Delete the image file
-    if (fs.existsSync(ad.imagePath)) {
-      fs.unlinkSync(ad.imagePath);
+    // FIX: Construct full file path for deletion
+    const fullPath = path.join(__dirname, '../uploads', ad.imagePath);
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath);
     }
     
     await Ad.findByIdAndDelete(req.params.id);
