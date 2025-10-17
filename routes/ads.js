@@ -3,8 +3,6 @@ const router = express.Router();
 const upload = require('../middleware/upload');
 const Ad = require('../models/Ad');
 const Category = require('../models/Category');
-const fs = require('fs');
-const path = require('path');
 
 // Get all ads with optional category filter
 router.get('/', async (req, res) => {
@@ -45,8 +43,6 @@ router.post('/', upload.single('image'), async (req, res) => {
     // Verify category exists
     const categoryDoc = await Category.findById(category);
     if (!categoryDoc) {
-      // Delete uploaded file if category doesn't exist
-      fs.unlinkSync(req.file.path);
       return res.status(400).json({ message: 'Invalid category' });
     }
     
@@ -54,6 +50,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       title: title.trim(),
       description: description?.trim(),
       category,
+      // CLOUDINARY FIX: Store the full Cloudinary URL
       imagePath: req.file.path,
       originalFileName: req.file.originalname,
       mimeType: req.file.mimetype,
@@ -67,10 +64,6 @@ router.post('/', upload.single('image'), async (req, res) => {
     
     res.status(201).json(ad);
   } catch (error) {
-    // Delete uploaded file if there's an error
-    if (req.file) {
-      fs.unlinkSync(req.file.path);
-    }
     res.status(400).json({ message: error.message });
   }
 });
@@ -91,8 +84,6 @@ router.post('/bulk', upload.array('images', 10), async (req, res) => {
     // Verify category exists
     const categoryDoc = await Category.findById(category);
     if (!categoryDoc) {
-      // Delete all uploaded files if category doesn't exist
-      req.files.forEach(file => fs.unlinkSync(file.path));
       return res.status(400).json({ message: 'Invalid category' });
     }
     
@@ -104,6 +95,7 @@ router.post('/bulk', upload.array('images', 10), async (req, res) => {
         title: (titleArray[i] || `Ad ${i + 1}`).trim(),
         description: (descriptionArray[i] || '').trim(),
         category,
+        // CLOUDINARY FIX: Store the full Cloudinary URL
         imagePath: file.path,
         originalFileName: file.originalname,
         mimeType: file.mimetype,
@@ -117,10 +109,6 @@ router.post('/bulk', upload.array('images', 10), async (req, res) => {
     
     res.status(201).json(ads);
   } catch (error) {
-    // Delete uploaded files if there's an error
-    if (req.files) {
-      req.files.forEach(file => fs.unlinkSync(file.path));
-    }
     res.status(400).json({ message: error.message });
   }
 });
@@ -179,10 +167,8 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Ad not found' });
     }
     
-    // Delete the image file
-    if (fs.existsSync(ad.imagePath)) {
-      fs.unlinkSync(ad.imagePath);
-    }
+    // NOTE: With Cloudinary, we don't need to delete files locally
+    // You could optionally delete from Cloudinary using their API
     
     await Ad.findByIdAndDelete(req.params.id);
     res.json({ message: 'Ad deleted successfully' });
