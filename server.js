@@ -10,9 +10,9 @@ const app = express();
 // Middleware
 app.use(cors({
   origin: [
-    'http://localhost:3000',
-    'https://admanager1.vercel.app'
-  ],
+  'http://localhost:3000',
+  'https://paper-ads-frontend.vercel.app'  // put your actual Vercel domain here after deploy!
+],
   credentials: true
 }));
 
