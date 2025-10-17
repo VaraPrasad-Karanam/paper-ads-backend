@@ -11,7 +11,7 @@ const app = express();
 app.use(cors({
   origin: [
   'http://localhost:3000',
-  'https://paper-ads-frontend.vercel.app'  // put your actual Vercel domain here after deploy!
+  'https://paper-ads-frontend1.vercel.app'  // ← Your actual Vercel URL
 ],
   credentials: true
 }));
