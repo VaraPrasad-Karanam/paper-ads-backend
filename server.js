@@ -8,12 +8,15 @@ const path = require('path');
 const app = express();
 
 // Middleware
+// Updated CORS config for image serving
 app.use(cors({
   origin: [
-  'http://localhost:3000',
-  'https://paper-ads-frontend1.vercel.app'  // ← Your actual Vercel URL
-],
-  credentials: true
+    'http://localhost:3000',
+    'https://paper-ads-frontend1.vercel.app'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json({ limit: '50mb' }));
