@@ -1,4 +1,6 @@
-require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 console.log('Loaded MONGODB_URI:', process.env.MONGODB_URI);
 
 const express = require('express');
@@ -31,21 +33,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 }));
 
 // Database connection
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-    console.log(`Database Name: ${conn.connection.name}`);
-  } catch (error) {
-    console.error('Database connection error:', error.message);
-    process.exit(1);
-  }
-};
-
-// Connect to database
+const connectDB = require('./config/db');
 connectDB();
 
 // Routes
